@@ -1,11 +1,13 @@
 #include "dfa.h"
 #include <stdbool.h>
 
-static int isDigit(char character) {
+static int isDigit(char character)
+{
     return character >= '0' && character <= '9';
 }
 
-bool isNumber(const char* input, DfaStatus* status) {
+bool isNumber(const char* input, DfaStatus* status)
+{
     typedef enum StateType {
         START, // начало
         SIGN, // знак + или -
@@ -135,6 +137,9 @@ bool isNumber(const char* input, DfaStatus* status) {
     }
 
     *status = DFA_OK;
-    return state == INT || state == DOT || state == FRAC ||
-           state == FRAC_NOT_IN_INT || state == NUM_EXP;
+    return state == INT
+           || state == DOT
+           || state == FRAC
+           || state == FRAC_NOT_IN_INT
+           || state == NUM_EXP;
 }

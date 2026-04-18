@@ -20,4 +20,4 @@ typedef enum DfaStatus {
     DfaInvalid
 } DfaStatus;
 
-bool isNumber(const char* input, DfaStatus* status
+bool isNumber(const char* input, DfaStatus* status);

@@ -21,9 +21,9 @@ bool isNumber(const char* input, DfaStatus* status)
             } else if (isDigit(character)) {
                 state = INT;
             } else if (character == '.') {
-                state = DOT_NOT_IN_INT;
+                state = DotNotInInt;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
@@ -32,9 +32,9 @@ bool isNumber(const char* input, DfaStatus* status)
             if (isDigit(character)) {
                 state = INT;
             } else if (character == '.') {
-                state = DOT_NOT_IN_INT;
+                state = DotNotInInt;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
@@ -47,7 +47,7 @@ bool isNumber(const char* input, DfaStatus* status)
             } else if (character == 'e' || character == 'E') {
                 state = EXP;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
@@ -58,7 +58,7 @@ bool isNumber(const char* input, DfaStatus* status)
             } else if (character == 'e' || character == 'E') {
                 state = EXP;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
@@ -69,63 +69,63 @@ bool isNumber(const char* input, DfaStatus* status)
             } else if (character == 'e' || character == 'E') {
                 state = EXP;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
 
-        case DOT_NOT_IN_INT:
+        case DotNotInInt:
             if (isDigit(character)) {
-                state = FRAC_NOT_IN_INT;
+                state = FracNotInInt;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
 
-        case FRAC_NOT_IN_INT:
+        case FracNotInInt:
             if (isDigit(character)) {
-                state = FRAC_NOT_IN_INT;
+                state = FracNotInInt;
             } else if (character == 'e' || character == 'E') {
                 state = EXP;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
 
         case EXP:
             if (character == '+' || character == '-') {
-                state = EXP_SIGN;
+                state = ExpSign;
             } else if (isDigit(character)) {
-                state = NUM_EXP;
+                state = NumExp;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
 
-        case EXP_SIGN:
+        case ExpSign:
             if (isDigit(character)) {
-                state = NUM_EXP;
+                state = NumExp;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
 
-        case NUM_EXP:
+        case NumExp:
             if (isDigit(character)) {
-                state = NUM_EXP;
+                state = NumExp;
             } else {
-                *status = DFA_INVALID;
+                *status = DfaInvalid;
                 return false;
             }
             break;
         }
     }
 
-    *status = DFA_OK;
+    *status = DfaOk;
 
-    return (state == INT || state == DOT || state == FRAC || state == FRAC_NOT_IN_INT || state == NUM_EXP);
+    return (state == INT || state == DOT || state == FRAC || state == FracNotInInt || state == NumExp);
 }

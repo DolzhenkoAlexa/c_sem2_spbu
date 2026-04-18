@@ -1,4 +1,4 @@
-#include "dfa.h"
+#include "../src/dfa.h"
 #include <stdio.h>
 
 int compareTest(const char* input, int expected)

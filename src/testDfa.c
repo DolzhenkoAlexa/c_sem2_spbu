@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include "dfa.h"
+#include <stdio.h>
 
 int compareTest(const char* input, int expected)
 {
@@ -12,7 +12,7 @@ int compareTest(const char* input, int expected)
     return 0;
 }
 
-int test1()
+int test1(void)
 {
     printf("Test 1: Integer number\n");
     int result = compareTest("123", 1);
@@ -20,7 +20,7 @@ int test1()
     return result;
 }
 
-int test2()
+int test2(void)
 {
     printf("Test 2: Negative number\n");
     int result = compareTest("-456", 1);
@@ -28,7 +28,7 @@ int test2()
     return result;
 }
 
-int test3()
+int test3(void)
 {
     printf("Test 3: Float with exponent\n");
     int result = compareTest("38.871E5", 1);
@@ -36,7 +36,7 @@ int test3()
     return result;
 }
 
-int test4()
+int test4(void)
 {
     printf("Test 4: Invalid double dot\n");
     int result = compareTest("823.16.10", 0);
@@ -44,7 +44,7 @@ int test4()
     return result;
 }
 
-int test5()
+int test5(void)
 {
     printf("Test 5: Not a number text\n");
     int result = compareTest("А я число?", 0);
@@ -52,7 +52,7 @@ int test5()
     return result;
 }
 
-int test6()
+int test6(void)
 {
     printf("Test 6: Empty string\n");
     int result = compareTest("", 0);
@@ -60,7 +60,7 @@ int test6()
     return result;
 }
 
-int test7()
+int test7(void)
 {
     printf("Test 7: Just dot\n");
     int result = compareTest(".", 0);
@@ -68,7 +68,7 @@ int test7()
     return result;
 }
 
-int test8()
+int test8(void)
 {
     printf("Test 8: Exponent without number\n");
     int result = compareTest("e10", 0);
@@ -76,7 +76,7 @@ int test8()
     return result;
 }
 
-int test9()
+int test9(void)
 {
     printf("Test 9: Plus sign only\n");
     int result = compareTest("+", 0);
@@ -84,7 +84,7 @@ int test9()
     return result;
 }
 
-int main()
+int main(void)
 {
     printf("Running tests:\n");
     int total = 0;

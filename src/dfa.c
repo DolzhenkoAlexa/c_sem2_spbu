@@ -111,8 +111,3 @@ bool isNumber(const char* input, DfaStatus* status)
 
     return (state == INT || state == DOT || state == FRAC || state == FracNotInInt || state == NumExp);
 }
-
-    *status = DfaOk;
-
-    return (state == INT || state == DOT || state == FRAC || state == FracNotInInt || state == NumExp);
-}

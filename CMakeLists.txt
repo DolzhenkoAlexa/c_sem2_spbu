@@ -7,4 +7,4 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 
-add_executable(csv src/dfa.c src/testDfa.c)
+add_executable(csv src/dfa.c tests/testDfa.c)

@@ -53,16 +53,6 @@ bool isNumber(const char* input, DfaStatus* status)
             break;
 
         case DOT:
-            if (isDigit(character)) {
-                state = FRAC;
-            } else if (character == 'e' || character == 'E') {
-                state = EXP;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
-
         case FRAC:
             if (isDigit(character)) {
                 state = FRAC;
@@ -106,14 +96,6 @@ bool isNumber(const char* input, DfaStatus* status)
             break;
 
         case ExpSign:
-            if (isDigit(character)) {
-                state = NumExp;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
-
         case NumExp:
             if (isDigit(character)) {
                 state = NumExp;
@@ -124,6 +106,11 @@ bool isNumber(const char* input, DfaStatus* status)
             break;
         }
     }
+
+    *status = DfaOk;
+
+    return (state == INT || state == DOT || state == FRAC || state == FracNotInInt || state == NumExp);
+}
 
     *status = DfaOk;
 

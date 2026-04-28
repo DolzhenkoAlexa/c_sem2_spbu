@@ -1,7 +1,8 @@
+#include "countries.h"
+
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "countries.h"
 
 int graphInit(Graph* graph, int numCities)
 {

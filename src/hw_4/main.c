@@ -1,6 +1,7 @@
+#include "countries.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "countries.h"
 
 int main() 
 {

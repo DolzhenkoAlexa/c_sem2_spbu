@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include "countries.h"
 
-int main() {
+int main() 
+{
     Graph roadGraph;
     State* statesArray;
     int* ownerArray;

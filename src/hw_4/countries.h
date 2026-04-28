@@ -1,5 +1,8 @@
 #pragma once
+
 #include <limits.h>
+#include <stdlib.h>
+
 #define MAX INT_MAX
 
 // Edge - дорога между городами

@@ -29,7 +29,7 @@ static CharClass classifyChar(char c, DfaStatus* status)
 }
 
 DFA* makeDfa(Transition* transitions, int transitionCount,
-             int* accepting, int accCount, int startState)
+    int* accepting, int accCount, int startState)
 {
     DFA* dfa = (DFA*)calloc(1, sizeof(DFA));
     if (!dfa)
@@ -90,8 +90,7 @@ bool checkDfa(DFA* dfa, const char* input, DfaStatus* status)
 
         int next = -1;
         for (int j = 0; j < dfa->transitionCount; j++) {
-            if (dfa->transitions[j].from == state &&
-                dfa->transitions[j].symbol == c) {
+            if (dfa->transitions[j].from == state && dfa->transitions[j].symbol == c) {
                 next = dfa->transitions[j].to;
                 break;
             }

@@ -1,23 +1,29 @@
 #pragma once
-
 #include <stdbool.h>
 
-typedef enum StateType {
-    Start, // начало
-    Sign, // знак + или -
-    Int, // целая часть числа
-    Dot, // точка после целой части
-    Frac, // дробная часть после точки
-    DotNotInInt, // точка без целой части
-    FracNotInInt, // дробная часть без целой части
-    Exp, // экспонента
-    ExpSign, // знак экспоненты
-    NumExp // цифры в экспоненте
-} StateType;
-
+// Коды ошибок
 typedef enum DfaStatus {
-    DfaOk,
-    DfaInvalid
+    DfaOk, // Правильная строка
+    DfaEmptyInput, // Пустая строка
+    DfaInvalidSymbol, // Символ не из алфавита
+    DfaNoTransition // Нет перехода для допустимого символа
 } DfaStatus;
 
-bool isNumber(const char* input, DfaStatus* status);
+// Описание одного перехода
+typedef struct {
+    int from;
+    char symbol;
+    int to;
+} Transition;
+
+typedef struct DFA DFA;
+
+// Создание ДКА
+DFA* makeDfa(Transition* transitions, int transCount,
+    int* accepting, int accCount, int startState);
+
+// Освобождение памяти
+void freeDfa(DFA* dfa);
+
+// Проверка соответствует ли строка заданному ДКА
+bool checkDfa(DFA* dfa, const char* input, DfaStatus* status);

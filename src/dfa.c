@@ -1,113 +1,100 @@
 #include "dfa.h"
+#include <ctype.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
-static bool isDigit(char character)
+struct DFA {
+    Transition* transitions;
+    int transCount;
+    int* accepting;
+    int accCount;
+    int startState;
+};
+
+static char classifyChar(char c, DfaStatus* status)
 {
-    return character >= '0' && character <= '9';
+    if (isdigit((unsigned char)c))
+        return 'd';
+    if (c == '+' || c == '-')
+        return 's';
+    if (c == '.')
+        return '.';
+    if (c == 'e' || c == 'E')
+        return 'e';
+
+    if (status)
+        *status = DfaInvalidSymbol;
+    return 0;
 }
 
-bool isNumber(const char* input, DfaStatus* status)
+DFA* makeDfa(Transition* transitions, int transCount,
+    int* accepting, int accCount, int startState)
 {
-    StateType state = Start;
+    DFA* dfa = (DFA*)calloc(1, sizeof(DFA));
+    if (!dfa)
+        return NULL;
 
-    for (int i = 0; input[i] != '\0'; i++) {
-        char character = input[i];
+    dfa->transitions = transitions;
+    dfa->transCount = transCount;
+    dfa->accepting = accepting;
+    dfa->accCount = accCount;
+    dfa->startState = startState;
 
-        switch (state) {
+    return dfa;
+}
 
-        case Start:
-            if (character == '+' || character == '-') {
-                state = Sign;
-            } else if (isDigit(character)) {
-                state = Int;
-            } else if (character == '.') {
-                state = DotNotInInt;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
+void freeDfa(DFA* dfa)
+{
+    free(dfa);
+}
 
-        case Sign:
-            if (isDigit(character)) {
-                state = Int;
-            } else if (character == '.') {
-                state = DotNotInInt;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
+bool checkDfa(DFA* dfa, const char* input, DfaStatus* status)
+{
+    if (status)
+        *status = DfaOk;
 
-        case Int:
-            if (isDigit(character)) {
-                state = Int;
-            } else if (character == '.') {
-                state = Dot;
-            } else if (character == 'e' || character == 'E') {
-                state = Exp;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
-
-        case Dot:
-        case Frac:
-            if (isDigit(character)) {
-                state = Frac;
-            } else if (character == 'e' || character == 'E') {
-                state = Exp;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
-
-        case DotNotInInt:
-            if (isDigit(character)) {
-                state = FracNotInInt;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
-
-        case FracNotInInt:
-            if (isDigit(character)) {
-                state = FracNotInInt;
-            } else if (character == 'e' || character == 'E') {
-                state = Exp;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
-
-        case Exp:
-            if (character == '+' || character == '-') {
-                state = ExpSign;
-            } else if (isDigit(character)) {
-                state = NumExp;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
-
-        case ExpSign:
-        case NumExp:
-            if (isDigit(character)) {
-                state = NumExp;
-            } else {
-                *status = DfaInvalid;
-                return false;
-            }
-            break;
-        }
+    if (input == NULL || input[0] == '\0') {
+        if (status)
+            *status = DfaEmptyInput;
+        return false;
     }
 
-    *status = DfaOk;
+    int state = dfa->startState;
 
-    return (state == Int || state == Dot || state == Frac || state == FracNotInInt || state == NumExp);
+    for (int i = 0; input[i] != '\0'; i++) {
+        char c = classifyChar(input[i], status);
+
+        // Если символ не из алфавита
+        if (c == 0) {
+            return false;
+        }
+
+        int next = -1;
+        for (int j = 0; j < dfa->transCount; j++) {
+            if (dfa->transitions[j].from == state && dfa->transitions[j].symbol == c) {
+                next = dfa->transitions[j].to;
+                break;
+            }
+        }
+
+        // Если нет перехода
+        if (next == -1) {
+            if (status)
+                *status = DfaNoTransition;
+            return false;
+        }
+
+        state = next;
+    }
+
+    for (int i = 0; i < dfa->accCount; i++) {
+        if (dfa->accepting[i] == state) {
+            if (status)
+                *status = DfaOk;
+            return true;
+        }
+    }
+    if (status)
+        *status = DfaNoTransition;
+    return false;
 }

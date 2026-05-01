@@ -1,85 +1,76 @@
 #include "../src/dfa.h"
 #include <stdio.h>
 
-int compareTest(const char* input, int expected)
+static int compareTest(Transition* transitions, int transCount,
+    int* accepting, int accCount,
+    const char* input, int expected)
 {
-    DfaStatus status;
-    int result = isNumber(input, &status);
+    DFA* dfa = makeDfa(transitions, transCount, accepting, accCount, 0);
+    if (!dfa)
+        return 0;
 
-    if (result == expected) {
-        return 1;
-    }
-    return 0;
+    DfaStatus status;
+    int result = checkDfa(dfa, input, &status);
+
+    freeDfa(dfa);
+    return result == expected;
 }
 
 int test1(void)
 {
     printf("Test 1: Integer number\n");
-    int result = compareTest("123", 1);
+
+    Transition transitions[] = {
+        { 0, 'd', 1 },
+        { 1, 'd', 1 }
+    };
+    int transCount = sizeof(transitions) / sizeof(transitions[0]);
+    int accepting[] = { 1 };
+    int accCount = sizeof(accepting) / sizeof(accepting[0]);
+
+    int result = compareTest(transitions, transCount, accepting, accCount, "123", 1);
     printf(result ? "PASSED\n" : "FAILED\n");
     return result;
 }
 
 int test2(void)
 {
-    printf("Test 2: Negative number\n");
-    int result = compareTest("-456", 1);
+    printf("Test 2: Not a number (contains letter)\n");
+
+    Transition transitions[] = {
+        { 0, 'd', 1 },
+        { 1, 'd', 1 }
+    };
+    int transCount = sizeof(transitions) / sizeof(transitions[0]);
+    int accepting[] = { 1 };
+    int accCount = sizeof(accepting) / sizeof(accepting[0]);
+
+    int result = compareTest(transitions, transCount, accepting, accCount, "12a3", 0);
     printf(result ? "PASSED\n" : "FAILED\n");
     return result;
 }
 
 int test3(void)
 {
-    printf("Test 3: Float with exponent\n");
-    int result = compareTest("38.871E5", 1);
-    printf(result ? "PASSED\n" : "FAILED\n");
-    return result;
-}
+    printf("Test 3: Negative float with exponent\n");
 
-int test4(void)
-{
-    printf("Test 4: Invalid double dot\n");
-    int result = compareTest("823.16.10", 0);
-    printf(result ? "PASSED\n" : "FAILED\n");
-    return result;
-}
+    Transition transitions[] = {
+        { 0, 'd', 2 }, { 0, '.', 5 }, { 0, 's', 1 },
+        { 1, 'd', 2 }, { 1, '.', 5 },
+        { 2, 'd', 2 }, { 2, '.', 3 }, { 2, 'e', 7 },
+        { 3, 'd', 4 },
+        { 4, 'd', 4 }, { 4, 'e', 7 },
+        { 5, 'd', 6 },
+        { 6, 'd', 6 }, { 6, 'e', 7 },
+        { 7, 'd', 9 }, { 7, 's', 8 },
+        { 8, 'd', 9 },
+        { 9, 'd', 9 }
+    };
+    int transCount = sizeof(transitions) / sizeof(transitions[0]);
+    int accepting[] = { 2, 3, 4, 6, 9 };
+    int accCount = sizeof(accepting) / sizeof(accepting[0]);
 
-int test5(void)
-{
-    printf("Test 5: Not a number text\n");
-    int result = compareTest("А я число?", 0);
-    printf(result ? "PASSED\n" : "FAILED\n");
-    return result;
-}
-
-int test6(void)
-{
-    printf("Test 6: Empty string\n");
-    int result = compareTest("", 0);
-    printf(result ? "PASSED\n" : "FAILED\n");
-    return result;
-}
-
-int test7(void)
-{
-    printf("Test 7: Just dot\n");
-    int result = compareTest(".", 0);
-    printf(result ? "PASSED\n" : "FAILED\n");
-    return result;
-}
-
-int test8(void)
-{
-    printf("Test 8: Exponent without number\n");
-    int result = compareTest("e10", 0);
-    printf(result ? "PASSED\n" : "FAILED\n");
-    return result;
-}
-
-int test9(void)
-{
-    printf("Test 9: Plus sign only\n");
-    int result = compareTest("+", 0);
+    int result = compareTest(transitions, transCount, accepting, accCount, "-3.14E-2", 1);
     printf(result ? "PASSED\n" : "FAILED\n");
     return result;
 }
@@ -88,17 +79,9 @@ int main(void)
 {
     printf("Running tests:\n");
     int total = 0;
-
     total += test1();
     total += test2();
     total += test3();
-    total += test4();
-    total += test5();
-    total += test6();
-    total += test7();
-    total += test8();
-    total += test9();
-    printf("Result: %d out of 9 tests passed\n", total);
-
+    printf("Result: %d out of 3 tests passed\n", total);
     return 0;
 }

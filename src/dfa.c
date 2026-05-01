@@ -25,7 +25,7 @@ static CharClass classifyChar(char c, DfaStatus* status)
 
     if (status)
         *status = DfaInvalidSymbol;
-    return -1;
+    return Invalid;
 }
 
 DFA* makeDfa(Transition* transitions, int transitionCount,
@@ -84,7 +84,7 @@ bool checkDfa(DFA* dfa, const char* input, DfaStatus* status)
         CharClass c = classifyChar(input[i], status);
 
         // Если символ не из алфавита
-        if (c == (CharClass)-1) {
+        if (c == Invalid) {
             return false;
         }
 

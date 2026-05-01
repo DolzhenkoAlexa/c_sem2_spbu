@@ -14,11 +14,12 @@ typedef enum CharClass {
     Digit,
     Sign,
     Dot,
-    Exponent
+    Exponent,
+    Invalid
 } CharClass;
 
 // Описание одного перехода
-typedef struct Transition {
+typedef struct {
     int from;
     CharClass symbol;
     int to;

@@ -77,7 +77,7 @@ char* duplicateString(const char* source)
     return destination;
 }
 
-// загрузкка файла
+// загрузка файла
 AvlTree* loadFile(const char* filename)
 {
     if (!filename)
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
 
     char* command = NULL;
 
-    while (1) {
+    while (true) {
         printf("> ");
 
         command = readDynamicLine(stdin);

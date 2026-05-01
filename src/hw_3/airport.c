@@ -64,11 +64,7 @@ static void nodeFree(AvlNode* node)
 
 static int getHeight(AvlNode* node)
 {
-    if (node) {
-        return node->height;
-    } else {
-        return 0;
-    }
+    return node ? node->height : 0;
 }
 
 static int getBalance(AvlNode* node)

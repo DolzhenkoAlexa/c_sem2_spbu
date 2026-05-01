@@ -3,20 +3,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define CMD_FIND "find "
+#define CMD_ADD "add "
+#define CMD_DELETE "delete "
+
 // Динамическое чтение строки
 char* readDynamicLine(FILE* file)
 {
     size_t capacity = 64;
     size_t length = 0;
-    char* buffer = (char*)calloc(capacity, sizeof(char));
+    char* buffer;
+    int character;
+    char* newBuffer;
+
+    buffer = (char*)calloc(capacity, sizeof(char));
     if (!buffer)
         return NULL;
 
-    int character;
     while ((character = fgetc(file)) != EOF && character != '\n') {
         if (length + 1 >= capacity) {
             capacity *= 2;
-            char* newBuffer = (char*)realloc(buffer, capacity);
+            newBuffer = (char*)realloc(buffer, capacity);
             if (!newBuffer) {
                 free(buffer);
                 return NULL;
@@ -37,22 +44,26 @@ char* readDynamicLine(FILE* file)
 
 void trimString(char* string)
 {
+    size_t length;
+    char* end;
+    char* start;
+
     if (!string)
         return;
 
-    size_t length = strlen(string);
+    length = strlen(string);
     if (length == 0)
         return;
 
     // Убирание пробелов с конца
-    char* end = string + length - 1;
+    end = string + length - 1;
     while (end >= string && (*end == '\n' || *end == '\r' || *end == ' ' || *end == '\t')) {
         *end = '\0';
         end--;
     }
 
     // Убирание пробелов с начала
-    char* start = string;
+    start = string;
     while (*start == ' ' || *start == '\t') {
         start++;
     }
@@ -65,11 +76,14 @@ void trimString(char* string)
 // Динамическое копирование строки
 char* duplicateString(const char* source)
 {
+    size_t length;
+    char* destination;
+
     if (!source)
         return NULL;
 
-    size_t length = strlen(source);
-    char* destination = (char*)calloc(length + 1, sizeof(char));
+    length = strlen(source);
+    destination = (char*)calloc(length + 1, sizeof(char));
     if (!destination)
         return NULL;
 
@@ -80,42 +94,50 @@ char* duplicateString(const char* source)
 // загрузка файла
 AvlTree* loadFile(const char* filename)
 {
+    FILE* file;
+    AvlTree* tree;
+    int airportsCount;
+    char* line;
+    char* separator;
+    size_t codeLength;
+    char* airportCode;
+    char* airportName;
+
     if (!filename)
         return NULL;
 
-    FILE* file = fopen(filename, "r");
+    file = fopen(filename, "r");
     if (!file) {
         printf("Error: cannot open %s\n", filename);
         return NULL;
     }
 
-    AvlTree* tree = avlCreate();
+    tree = avlCreate();
     if (!tree) {
         fclose(file);
         return NULL;
     }
 
-    int airportsCount = 0;
-    char* line = NULL;
+    airportsCount = 0;
 
     while ((line = readDynamicLine(file)) != NULL) {
         trimString(line);
 
         if (strlen(line) > 0) {
-            char* separator = strchr(line, ':');
+            separator = strchr(line, ':');
             if (!separator) {
                 free(line);
                 continue;
             }
 
-            size_t codeLength = separator - line;
+            codeLength = separator - line;
 
             if (codeLength == 0) {
                 free(line);
                 continue;
             }
 
-            char* airportCode = (char*)calloc(codeLength + 1, sizeof(char));
+            airportCode = (char*)calloc(codeLength + 1, sizeof(char));
             if (!airportCode) {
                 printf("Error: Failed to allocate memory for airport code\n");
                 free(line);
@@ -125,7 +147,7 @@ AvlTree* loadFile(const char* filename)
             strncpy(airportCode, line, codeLength);
             airportCode[codeLength] = '\0';
 
-            char* airportName = duplicateString(separator + 1);
+            airportName = duplicateString(separator + 1);
             if (!airportName) {
                 printf("Error: Failed to allocate memory for airport name\n");
                 free(airportCode);
@@ -155,18 +177,24 @@ AvlTree* loadFile(const char* filename)
 
 int main(int argc, char* argv[])
 {
+    AvlTree* tree;
+    char* command;
+    const size_t find_len = strlen(CMD_FIND);
+    const size_t add_len = strlen(CMD_ADD);
+    const size_t delete_len = strlen(CMD_DELETE);
+
     if (argc != 2) {
-        printf("Error: No filename");
+        printf("Error: No filename\n");
         return 1;
     }
 
-    AvlTree* tree = loadFile(argv[1]);
+    tree = loadFile(argv[1]);
     if (!tree)
         return 1;
 
-    char* command = NULL;
+    command = NULL;
 
-    while (true) {
+    while (1) {
         printf("> ");
 
         command = readDynamicLine(stdin);
@@ -180,37 +208,45 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        if (strncmp(command, "find ", 5) == 0) {
-            char* airportCode = command + 5;
+        if (strncmp(command, CMD_FIND, find_len) == 0) {
+            char* airportCode = command + find_len;
+            const char* airportName;
+
             if (strlen(airportCode) == 0) {
                 printf("Error: mistake in a command. Right usage: find <code>\n");
                 free(command);
                 continue;
             }
 
-            const char* airportName = findAirport(tree, airportCode);
+            airportName = findAirport(tree, airportCode);
             if (airportName) {
                 printf("%s -> %s\n", airportCode, airportName);
             } else {
                 printf("Airport '%s' not found.\n", airportCode);
             }
-        } else if (strncmp(command, "add ", 4) == 0) {
-            char* argument = command + 4;
+        } else if (strncmp(command, CMD_ADD, add_len) == 0) {
+            char* argument = command + add_len;
+            char* delimiter;
+            size_t codeLength;
+            size_t nameLength;
+            char* airportCode;
+            char* airportName;
+
             if (strlen(argument) == 0) {
                 printf("Error: mistake in a command. Right usage: add <code>:<name>\n");
                 free(command);
                 continue;
             }
 
-            char* delimiter = strchr(argument, ':');
+            delimiter = strchr(argument, ':');
             if (!delimiter) {
                 printf("Error: mistake in a command. Right usage: add <code>:<name>\n");
                 free(command);
                 continue;
             }
 
-            size_t codeLength = delimiter - argument;
-            size_t nameLength = strlen(delimiter + 1);
+            codeLength = delimiter - argument;
+            nameLength = strlen(delimiter + 1);
 
             if (codeLength == 0 || nameLength == 0) {
                 printf("Error: code and name must be not NULL\n");
@@ -218,7 +254,7 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            char* airportCode = (char*)calloc(codeLength + 1, sizeof(char));
+            airportCode = (char*)calloc(codeLength + 1, sizeof(char));
             if (!airportCode) {
                 printf("Error: Memory allocation failed\n");
                 free(command);
@@ -228,7 +264,7 @@ int main(int argc, char* argv[])
             strncpy(airportCode, argument, codeLength);
             airportCode[codeLength] = '\0';
 
-            char* airportName = duplicateString(delimiter + 1);
+            airportName = duplicateString(delimiter + 1);
             if (!airportName) {
                 printf("Error: Memory allocation failed\n");
                 free(airportCode);
@@ -248,8 +284,9 @@ int main(int argc, char* argv[])
             free(airportCode);
             free(airportName);
             printf("Airport '%s' added.\n", airportCode);
-        } else if (strncmp(command, "delete ", 7) == 0) {
-            char* airportCode = command + 7;
+        } else if (strncmp(command, CMD_DELETE, delete_len) == 0) {
+            char* airportCode = command + delete_len;
+
             if (strlen(airportCode) == 0) {
                 printf("Error: mistake in a command. Right usage: delete <code>\n");
                 free(command);

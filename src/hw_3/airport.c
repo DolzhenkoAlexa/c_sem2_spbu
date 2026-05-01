@@ -17,12 +17,14 @@ struct AvlTree {
 
 static AvlNode* nodeCreate(const char* code, const char* name)
 {
+    AvlNode* node;
+
     if (!code || !name) {
         fprintf(stderr, "Error: arguments are NULL\n");
         return NULL;
     }
 
-    AvlNode* node = (AvlNode*)calloc(1, sizeof(AvlNode));
+    node = (AvlNode*)calloc(1, sizeof(AvlNode));
     if (!node) {
         fprintf(stderr, "Error: Failed to allocate memory for AVL node\n");
         return NULL;
@@ -48,6 +50,7 @@ static AvlNode* nodeCreate(const char* code, const char* name)
     node->left = NULL;
     node->right = NULL;
     node->height = 1;
+
     return node;
 }
 
@@ -69,67 +72,73 @@ static int getHeight(AvlNode* node)
 
 static int getBalance(AvlNode* node)
 {
-    if (node) {
-        return getHeight(node->left) - getHeight(node->right);
-    } else {
-        return 0;
-    }
+    return node ? getHeight(node->left) - getHeight(node->right) : 0;
 }
 
 static void updateHeight(AvlNode* node)
 {
-    if (node) {
-        int leftHeight = getHeight(node->left);
-        int rightHeight = getHeight(node->right);
-        if (leftHeight > rightHeight) {
-            node->height = leftHeight + 1;
-        } else {
-            node->height = rightHeight + 1;
-        }
-    }
+    int leftHeight;
+    int rightHeight;
+
+    if (!node)
+        return;
+
+    leftHeight = getHeight(node->left);
+    rightHeight = getHeight(node->right);
+    node->height = (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
 }
 
 static AvlNode* rotateRight(AvlNode* oldRoot)
 {
+    AvlNode* newRoot;
+    AvlNode* subtree;
+
     if (!oldRoot->left) {
         return oldRoot;
     }
 
-    AvlNode* newRoot = oldRoot->left;
-    AvlNode* subtree = newRoot->right;
+    newRoot = oldRoot->left;
+    subtree = newRoot->right;
 
     newRoot->right = oldRoot;
     oldRoot->left = subtree;
 
     updateHeight(oldRoot);
     updateHeight(newRoot);
+
     return newRoot;
 }
 
 static AvlNode* rotateLeft(AvlNode* oldRoot)
 {
+    AvlNode* newRoot;
+    AvlNode* subtree;
+
     if (!oldRoot->right) {
         return oldRoot;
     }
 
-    AvlNode* newRoot = oldRoot->right;
-    AvlNode* subtree = newRoot->left;
+    newRoot = oldRoot->right;
+    subtree = newRoot->left;
 
     newRoot->left = oldRoot;
     oldRoot->right = subtree;
 
     updateHeight(oldRoot);
     updateHeight(newRoot);
+
     return newRoot;
 }
 
 static AvlNode* balanceNode(AvlNode* node)
 {
+    int balanceFactor;
+
     if (!node)
         return NULL;
 
     updateHeight(node);
-    int balanceFactor = getBalance(node);
+    balanceFactor = getBalance(node);
 
     if (balanceFactor > 1 && getBalance(node->left) >= 0) {
         return rotateRight(node);
@@ -162,18 +171,45 @@ static AvlNode* balanceNode(AvlNode* node)
 
 static AvlNode* findMinNode(AvlNode* node)
 {
+    AvlNode* current;
+
     if (!node)
         return NULL;
 
-    AvlNode* current = node;
+    current = node;
     while (current->left) {
         current = current->left;
     }
     return current;
 }
 
+static AvlNode* deleteNodeWithoutChildren(AvlNode* node)
+{
+    if (!node)
+        return NULL;
+
+    free(node->code);
+    free(node->name);
+    free(node);
+    return NULL;
+}
+
+static AvlNode* replaceNodeWithChild(AvlNode* node, AvlNode* child)
+{
+    if (!node)
+        return child;
+
+    free(node->code);
+    free(node->name);
+    free(node);
+    return child;
+}
+
 static AvlNode* insertNode(AvlNode* root, const char* code, const char* name)
 {
+    int compareResult;
+    AvlNode* balanced;
+
     if (!root) {
         AvlNode* newNode = nodeCreate(code, name);
         if (!newNode) {
@@ -183,27 +219,16 @@ static AvlNode* insertNode(AvlNode* root, const char* code, const char* name)
         return newNode;
     }
 
-    int compareResult = strcmp(code, root->code);
-
+    compareResult = strcmp(code, root->code);
     if (compareResult < 0) {
         root->left = insertNode(root->left, code, name);
-        if (!root->left && root->left != insertNode(root->left, code, name)) {
-            if (root->left == NULL) {
-                return NULL;
-            }
-        }
     } else if (compareResult > 0) {
         root->right = insertNode(root->right, code, name);
-        if (!root->right && root->right != insertNode(root->right, code, name)) {
-            if (root->right == NULL) {
-                return NULL;
-            }
-        }
     } else {
         return root;
     }
 
-    AvlNode* balanced = balanceNode(root);
+    balanced = balanceNode(root);
     if (!balanced) {
         fprintf(stderr, "Error: Failed to balance tree\n");
         return root;
@@ -213,10 +238,15 @@ static AvlNode* insertNode(AvlNode* root, const char* code, const char* name)
 
 static AvlNode* deleteNode(AvlNode* root, const char* code)
 {
+    int compareResult;
+    AvlNode* balanced;
+    AvlNode* child;
+    AvlNode* minNode;
+
     if (!root)
         return NULL;
 
-    int compareResult = strcmp(code, root->code);
+    compareResult = strcmp(code, root->code);
 
     if (compareResult < 0) {
         root->left = deleteNode(root->left, code);
@@ -224,27 +254,15 @@ static AvlNode* deleteNode(AvlNode* root, const char* code)
         root->right = deleteNode(root->right, code);
     } else {
         if (!root->left || !root->right) {
-            AvlNode* temp = NULL;
-            if (root->left) {
-                temp = root->left;
-            } else {
-                temp = root->right;
-            }
+            child = root->left ? root->left : root->right;
 
-            if (!temp) {
-                free(root->code);
-                free(root->name);
-                free(root);
-                return NULL;
+            if (!child) {
+                return deleteNodeWithoutChildren(root);
             } else {
-                AvlNode* nodeToDelete = root;
-                root = temp;
-                free(nodeToDelete->code);
-                free(nodeToDelete->name);
-                free(nodeToDelete);
+                return replaceNodeWithChild(root, child);
             }
         } else {
-            AvlNode* minNode = findMinNode(root->right);
+            minNode = findMinNode(root->right);
             if (!minNode) {
                 fprintf(stderr, "Error: Failed to find minimum node\n");
                 return balanceNode(root);
@@ -270,11 +288,12 @@ static AvlNode* deleteNode(AvlNode* root, const char* code)
 
             strcpy(root->code, minNode->code);
             strcpy(root->name, minNode->name);
+
             root->right = deleteNode(root->right, minNode->code);
         }
     }
 
-    AvlNode* balanced = balanceNode(root);
+    balanced = balanceNode(root);
     if (!balanced && root) {
         fprintf(stderr, "Error: Failed to balance tree\n");
         return root;
@@ -284,10 +303,12 @@ static AvlNode* deleteNode(AvlNode* root, const char* code)
 
 static const char* findNode(AvlNode* root, const char* code)
 {
+    int compareResult;
+
     if (!root)
         return NULL;
 
-    int compareResult = strcmp(code, root->code);
+    compareResult = strcmp(code, root->code);
     if (compareResult < 0) {
         return findNode(root->left, code);
     }
@@ -301,22 +322,17 @@ static void saveNode(AvlNode* root, FILE* file)
 {
     if (!root || !file)
         return;
-    saveNode(root->left, file);
 
+    saveNode(root->left, file);
     if (fprintf(file, "%s:%s\n", root->code, root->name) < 0) {
         fprintf(stderr, "Error: Failed to write to file\n");
     }
-
     saveNode(root->right, file);
 }
 
 static int countNodes(AvlNode* root)
 {
-    if (root) {
-        return 1 + countNodes(root->left) + countNodes(root->right);
-    } else {
-        return 0;
-    }
+    return root ? 1 + countNodes(root->left) + countNodes(root->right) : 0;
 }
 
 AvlTree* avlCreate(void)
@@ -350,7 +366,6 @@ void insertAirport(AvlTree* tree, const char* code, const char* name)
         fprintf(stderr, "Error: name is NULL\n");
         return;
     }
-
     tree->root = insertNode(tree->root, code, name);
 }
 
@@ -364,7 +379,6 @@ void deleteAirport(AvlTree* tree, const char* code)
         fprintf(stderr, "Error: code is NULL\n");
         return;
     }
-
     tree->root = deleteNode(tree->root, code);
 }
 
@@ -378,12 +392,13 @@ const char* findAirport(AvlTree* tree, const char* code)
         fprintf(stderr, "Error: code is NULL\n");
         return NULL;
     }
-
     return findNode(tree->root, code);
 }
 
 void saveAirport(AvlTree* tree, const char* filename)
 {
+    FILE* file;
+
     if (!tree) {
         fprintf(stderr, "Error: tree is NULL\n");
         return;
@@ -393,7 +408,7 @@ void saveAirport(AvlTree* tree, const char* filename)
         return;
     }
 
-    FILE* file = fopen(filename, "w");
+    file = fopen(filename, "w");
     if (!file) {
         fprintf(stderr, "Error: Failed to open file '%s'\n", filename);
         return;
@@ -412,6 +427,5 @@ int countAirport(AvlTree* tree)
         fprintf(stderr, "Error: tree is NULL\n");
         return 0;
     }
-
     return countNodes(tree->root);
 }

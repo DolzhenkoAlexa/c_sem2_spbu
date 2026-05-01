@@ -9,17 +9,25 @@ typedef enum DfaStatus {
     DfaNoTransition // Нет перехода для допустимого символа
 } DfaStatus;
 
+// Enum для разных видов char
+typedef enum CharClass {
+    Digit,
+    Sign,
+    Dot,
+    Exponent
+} CharClass;
+
 // Описание одного перехода
-typedef struct {
+typedef struct Transition {
     int from;
-    char symbol;
+    CharClass symbol;
     int to;
 } Transition;
 
 typedef struct DFA DFA;
 
 // Создание ДКА
-DFA* makeDfa(Transition* transitions, int transCount,
+DFA* makeDfa(Transition* transitions, int transitionCount,
     int* accepting, int accCount, int startState);
 
 // Освобождение памяти

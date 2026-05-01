@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
 
     command = NULL;
 
-    while (1) {
+    while (true) {
         printf("> ");
 
         command = readDynamicLine(stdin);

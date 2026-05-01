@@ -19,11 +19,12 @@ int test1(void)
 {
     printf("Test 1: Create tree and add one airport\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
-    
+    if (!tree)
+        return 0;
+
     insertAirport(tree, "SVX", "Koltsovo");
     int passed = compareTest(tree, "SVX", "Koltsovo");
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -34,17 +35,18 @@ int test2(void)
 {
     printf("Test 2: Add some airports and search\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
-    
+    if (!tree)
+        return 0;
+
     insertAirport(tree, "SVX", "Koltsovo");
     insertAirport(tree, "LED", "Pulkovo");
     insertAirport(tree, "SVO", "Sheremetyevo");
-    
+
     int passed = 1;
     passed &= compareTest(tree, "SVX", "Koltsovo");
     passed &= compareTest(tree, "LED", "Pulkovo");
     passed &= compareTest(tree, "SVO", "Sheremetyevo");
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -55,11 +57,12 @@ int test3(void)
 {
     printf("Test 3: Search airport, that is not in a list\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
-    
+    if (!tree)
+        return 0;
+
     insertAirport(tree, "SVX", "Koltsovo");
     int passed = compareTest(tree, "XXX", NULL);
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -70,16 +73,17 @@ int test4(void)
 {
     printf("Test 4: Delete airport\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
-    
+    if (!tree)
+        return 0;
+
     insertAirport(tree, "SVX", "Koltsovo");
     insertAirport(tree, "LED", "Pulkovo");
     deleteAirport(tree, "SVX");
-    
+
     int passed = 1;
     passed &= compareTest(tree, "SVX", NULL);
     passed &= compareTest(tree, "LED", "Pulkovo");
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -90,15 +94,16 @@ int test5(void)
 {
     printf("Test 5: Delete root\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
-    
+    if (!tree)
+        return 0;
+
     insertAirport(tree, "SVX", "Koltsovo");
     insertAirport(tree, "LED", "Pulkovo");
     insertAirport(tree, "SVO", "Sheremetyevo");
     deleteAirport(tree, "SVX");
-    
+
     int passed = compareTest(tree, "SVX", NULL);
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -109,15 +114,16 @@ int test6(void)
 {
     printf("Test 6: Count airports\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
-    
+    if (!tree)
+        return 0;
+
     insertAirport(tree, "SVX", "Koltsovo");
     insertAirport(tree, "LED", "Pulkovo");
     insertAirport(tree, "SVO", "Sheremetyevo");
-    
+
     int count = countAirport(tree);
     int passed = (count == 3);
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -128,15 +134,16 @@ int test7(void)
 {
     printf("Test 7: Add duplicate airport\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
-    
+    if (!tree)
+        return 0;
+
     insertAirport(tree, "SVX", "Koltsovo");
-    insertAirport(tree, "SVX", "Surgut");  // Дубликат
-    
+    insertAirport(tree, "SVX", "Surgut"); // Дубликат
+
     const char* name = findAirport(tree, "SVX");
     int passed = (name != NULL && strcmp(name, "Koltsovo") == 0);
     passed &= (countAirport(tree) == 1);
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -147,17 +154,18 @@ int test8(void)
 {
     printf("Test 8: Delete airport, that is not in a list\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
-    
+    if (!tree)
+        return 0;
+
     insertAirport(tree, "SVX", "Koltsovo");
     insertAirport(tree, "LED", "Pulkovo");
     deleteAirport(tree, "XXX");
-    
+
     int passed = 1;
     passed &= compareTest(tree, "SVX", "Koltsovo");
     passed &= compareTest(tree, "LED", "Pulkovo");
     passed &= (countAirport(tree) == 2);
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -168,7 +176,8 @@ int test9(void)
 {
     printf("Test 9: NULL arguments\n");
     AvlTree* tree = avlCreate();
-    if (!tree) return 0;
+    if (!tree)
+        return 0;
 
     insertAirport(NULL, "SVX", "Koltsovo");
     insertAirport(tree, NULL, "Koltsovo");
@@ -180,7 +189,7 @@ int test9(void)
     countAirport(NULL);
     insertAirport(tree, "SVX", "Koltsovo");
     int passed = compareTest(tree, "SVX", "Koltsovo");
-    
+
     avlDestroy(tree);
     printf(passed ? "PASSED\n" : "FAILED\n");
     return passed;
@@ -190,7 +199,7 @@ int main(void)
 {
     printf("Running tests:\n");
     int total = 0;
-    
+
     total += test1();
     total += test2();
     total += test3();
@@ -202,6 +211,6 @@ int main(void)
     total += test9();
 
     printf("Result: %d out of 9 tests passed\n", total);
-    
+
     return 0;
 }

@@ -14,7 +14,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y build-essential
 
       - name: Compile tests
-        run: gcc -Wall -Wextra tests/test_airport.c src/hw_3/airport.c -o test_airport -I.
+        run: gcc -Wall -Wextra tests/airportTests.c src/hw_3/airport.c -o test_airport -I.
 
       - name: Run tests
         run: ./test_airport
